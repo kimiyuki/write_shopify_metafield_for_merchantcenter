@@ -55,18 +55,18 @@ def update_variant_metafield(variant, logger):
 def main(test_mode=True):
     logger = setup_logger()
     logger.info("Starting metafield update process")
-    logger.info(f"Running in {'test' if test_mode else 'production'} mode")
     
     init_shopify()
     
-    page = 1
     total_products = 0
     total_variants = 0
     success_variants = 0
     
     try:
+        # 最初のページを取得
+        products = shopify.Product.find(collection_id=COLLECTION_ID, limit=BATCH_SIZE)
+        
         while True:
-            products = get_products_from_collection(COLLECTION_ID, BATCH_SIZE, page, logger)
             if not products:
                 break
                 
@@ -80,8 +80,7 @@ def main(test_mode=True):
                         success_variants += 1
                         logger.info(f"Updated variant {variant.id}")
                     
-                    # API制限を考慮して少し待機
-                    time.sleep(0.5)
+                    time.sleep(0.5)  # API制限を考慮
                 
                 if test_mode and total_products >= 1:
                     logger.info("Test mode completed")
@@ -90,8 +89,12 @@ def main(test_mode=True):
             if test_mode and total_products >= 1:
                 break
                 
-            page += 1
-            
+            # 次のページがあれば取得
+            if products.has_next_page():
+                products = products.next_page()
+            else:
+                break
+    
     except Exception as e:
         logger.error(f"Error in main process: {str(e)}")
     
