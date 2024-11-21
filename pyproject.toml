@@ -1,0 +1,9 @@
+[project]
+name = "shopify-metafield-update"
+version = "0.1.0"
+description = "Update Shopify variant metafields for specific collection"
+requires-python = ">=3.8"
+dependencies = [
+    "ShopifyAPI>=12.3.0",
+    "python-dotenv>=1.0.0",
+] 
